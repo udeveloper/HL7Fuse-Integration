@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SuperSocket.SocketBase.Command;
 using HL7Fuse.Protocol;
+using System.Diagnostics;
 
 namespace HL7Fuse.Hub
 {
@@ -18,10 +19,11 @@ namespace HL7Fuse.Hub
         #endregion
 
         #region Public methods
-        public void ExecuteCommand(MLLPSession session, HL7RequestInfo requestInfo)
-        {
+        public virtual void ExecuteCommand(MLLPSession session, HL7RequestInfo requestInfo)
+        {          
             // Handle event
             ConnectionManager.Instance.SendMessage(requestInfo.Message);
+            
         }
         #endregion
     }

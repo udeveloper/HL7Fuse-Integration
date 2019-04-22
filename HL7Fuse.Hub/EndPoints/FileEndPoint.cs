@@ -1,13 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 using NHapi.Base.Model;
-using NHapi.Base.Util;
-using NHapiTools.Base.Net;
 using NHapi.Base.Parser;
 
 namespace HL7Fuse.Hub.EndPoints
