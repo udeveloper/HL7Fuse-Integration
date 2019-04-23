@@ -35,7 +35,9 @@ namespace HL7Fuse
 
             if (!AcceptEventIfNotImplemented)
             {
-                requestInfo.ErrorMessage = "Unknown request.";
+                if(requestInfo.ErrorMessage==null)
+                   requestInfo.ErrorMessage = "Unknown request.";
+
                 msg = GetAck(requestInfo, requestInfo.ErrorMessage);
             }
             else

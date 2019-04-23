@@ -40,6 +40,7 @@ namespace HL7Fuse.Protocol
             {
                 return (ErrorMessage != null);
             }
+            
         }
 
         /// <summary>
