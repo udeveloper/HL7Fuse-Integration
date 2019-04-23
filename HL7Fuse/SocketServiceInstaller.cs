@@ -25,7 +25,7 @@ namespace HL7Fuse
             this.serviceInstaller = new ServiceInstaller();
             this.processInstaller.Account = ServiceAccount.LocalSystem;
             this.serviceInstaller.StartType = ServiceStartMode.Automatic;
-            this.serviceInstaller.ServiceName = ConfigurationManager.AppSettings["ServiceName"];
+            this.serviceInstaller.ServiceName = ConfigurationManager.AppSettings["ServiceName"];            
             string str1 = ConfigurationManager.AppSettings["ServiceDescription"];
             if (!string.IsNullOrEmpty(str1))
                 this.serviceInstaller.Description = str1;

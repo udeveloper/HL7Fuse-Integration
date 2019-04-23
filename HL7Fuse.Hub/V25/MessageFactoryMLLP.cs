@@ -27,7 +27,7 @@ namespace HL7Fuse.Hub.V25
 
         public override void ExecuteCommand(MLLPSession session, HL7RequestInfo requestInfo)
         {
-            LogToDebugConsole(new PipeParser().Encode(requestInfo.Message));
+            Logging.Logger.Info(new PipeParser().Encode(requestInfo.Message));
 
             if (requestInfo.Message is ORU_R01)
             {
@@ -35,8 +35,8 @@ namespace HL7Fuse.Hub.V25
                     requestInfo.ErrorMessage = "";
 
             }
-            
-            ConnectionManager.Instance.SendMessage(requestInfo.Message);
+
+            base.ExecuteCommand(session, requestInfo);
             
         }
 

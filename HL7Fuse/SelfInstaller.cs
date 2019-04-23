@@ -3,6 +3,7 @@
 // MVID: 9C172A0A-F91F-4CC9-B921-9FE0407DCF07
 // Assembly location: C:\Source\HL7Fuse\Solution Items\SuperSocket\SuperSocket.SocketService.exe
 
+using System;
 using System.Configuration.Install;
 using System.Reflection;
 
@@ -25,7 +26,7 @@ namespace HL7Fuse
           SelfInstaller._exePath
         });
             }
-            catch
+            catch (Exception ex)
             {
                 return false;
             }
