@@ -12,6 +12,7 @@ using HL7Fuse.Helpers;
 using System.Diagnostics;
 using System.IO;
 
+
 namespace HL7Fuse.Hub.V25
 {
     /// <summary>
@@ -29,12 +30,33 @@ namespace HL7Fuse.Hub.V25
         {
             Logging.Logger.Info(new PipeParser().Encode(requestInfo.Message));
 
-            if (requestInfo.Message is ORU_R01)
+            if (requestInfo.Message is ORU_R01 || requestInfo.Message is MDM_T02)
             {
                 if (!GetBinaryDataMessageHL7(requestInfo.Message))
                     requestInfo.ErrorMessage = "";
 
             }
+
+            //var messageId = Guid.NewGuid().ToString();
+
+            //ConfigurationPublisherClient publisher = new ConfigurationPublisherClient
+            //{
+            //    Applicacion = "IntegrationAPI",
+            //    Module = "accountMedicalDocuments",
+            //    CallbackResponse = true,
+            //    Action = (OperationType)1,
+            //    CorrelationId = "0",
+            //    Priority = 0,
+            //    ReplyTo = "0",
+            //    UserId = "",
+            //    Entity = "accountMedicalDocuments",
+            //    //PropertiesCustom = JsonConvert.DeserializeObject<Dictionary<string, object>>(metadata),
+            //    Metadata = new Dictionary<string, object>(),
+            //    MessageId = messageId,
+            //};
+            
+            //var brokerClient = new RabbitMQBrokerClient("13.90.192.76", "developerAdmin", "developerAdmin", "C:\\Servinte\\configSynchronizationAPI.json", "/");
+            //var result = brokerClient.SendMessage<object, object>(requestInfo.Message, null, publisher);
 
             base.ExecuteCommand(session, requestInfo);
             
@@ -44,28 +66,36 @@ namespace HL7Fuse.Hub.V25
         {
             var processValid = false;
             var messageHL7Parsed = message;
+            ED encapsulatedPdfDataInBase64Format = null;
 
-            if (messageHL7Parsed is  ORU_R01)
+            // Display the updated HL7 message using Pipe delimited format
+            LogToDebugConsole("Parsed HL7 Message:");
+            LogToDebugConsole(new PipeParser().Encode(messageHL7Parsed));
+
+            if (messageHL7Parsed is ORU_R01 oruMessage)
             {
-                var oruMessage = (ORU_R01)messageHL7Parsed;
-
                 if (oruMessage != null)
                 {
-                    // Display the updated HL7 message using Pipe delimited format
-                    LogToDebugConsole("Parsed HL7 Message:");
-                    LogToDebugConsole(new PipeParser().Encode(messageHL7Parsed));
-
-                    var encapsulatedPdfDataInBase64Format = ExtractEncapsulatedPdfDataInBase64Format(oruMessage);
-
-                    //if no encapsulated data was found, you can cease operation
-                    if (encapsulatedPdfDataInBase64Format != null)
-                    {
-                        var extractedPdfByteData = GetBase64DecodedPdfByteData(encapsulatedPdfDataInBase64Format);
-                        WriteExtractedPdfByteDataToFile(extractedPdfByteData);
-                        processValid = true;
-                    }
+                    encapsulatedPdfDataInBase64Format = ExtractEncapsulatedPdfDataInBase64Format(oruMessage);
                 }
             }
+            else if (messageHL7Parsed is MDM_T02 mdmMessage)
+            {
+                if (mdmMessage != null)
+                {
+
+                    encapsulatedPdfDataInBase64Format = ExtractEncapsulatedPdfDataInBase64Format(mdmMessage);
+                }
+            }
+
+            //if no encapsulated data was found, you can cease operation
+            if (encapsulatedPdfDataInBase64Format != null)
+            {
+                var extractedPdfByteData = GetBase64DecodedPdfByteData(encapsulatedPdfDataInBase64Format);
+                WriteExtractedPdfByteDataToFile(extractedPdfByteData);
+                processValid = true;
+            }
+
             return processValid;
         }
 
@@ -90,6 +120,18 @@ namespace HL7Fuse.Hub.V25
             var encapsulatedPdfDataInBase64Format = obxSegment.GetObservationValue(0).Data as ED;
             return encapsulatedPdfDataInBase64Format;
         }
+
+        private ED ExtractEncapsulatedPdfDataInBase64Format(MDM_T02 oruMessage)
+        {
+            //start retrieving the OBX segment data to get at the PDF report content
+            LogToDebugConsole("Extracting message data from parsed message..");
+            var orderObservation = oruMessage.GetOBXNTE(0);            
+            var obxSegment = orderObservation.OBX;
+
+            var encapsulatedPdfDataInBase64Format = obxSegment.GetObservationValue(0).Data as ED;
+            return encapsulatedPdfDataInBase64Format;
+        }
+
 
         private void WriteExtractedPdfByteDataToFile(byte[] extractedPdfByteData)
         {
